@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Users } from "lucide-react";
 import { useUsers } from "@/hooks/useUsers";
-import { usePagination } from "@/hooks/usePagination";
+import { useServerPagination } from "@/hooks/useServerPagination";
 import { UsersTable } from "@/components/users/UsersTable";
 import { UserDetailDialog } from "@/components/users/UserDetailDialog";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -22,9 +22,12 @@ export default function UsersPage() {
 
 function UsersPageContent() {
   const [search, setSearch] = useState("");
-  const { data: users, isLoading, isError } = useUsers(search);
+  const pagination = useServerPagination(10);
+  const { data, isLoading, isError } = useUsers(search, pagination);
   const [selected, setSelected] = useState<AdminUser | null>(null);
-  const pagination = usePagination(users ?? []);
+  const users = data?.users ?? [];
+  const total = data?.total ?? 0;
+  const pageCount = Math.max(1, Math.ceil(total / pagination.pageSize));
 
   return (
     <div className="space-y-4">
@@ -49,7 +52,7 @@ function UsersPageContent() {
           title="Couldn't load users"
           description="Something went wrong talking to the API. Try refreshing the page."
         />
-      ) : !users || users.length === 0 ? (
+      ) : users.length === 0 ? (
         <EmptyState
           icon={Users}
           title="No users found"
@@ -57,11 +60,11 @@ function UsersPageContent() {
         />
       ) : (
         <>
-          <UsersTable users={pagination.pageItems} onView={setSelected} />
+          <UsersTable users={users} onView={setSelected} />
           <Pagination
             page={pagination.page}
-            pageCount={pagination.pageCount}
-            total={pagination.total}
+            pageCount={pageCount}
+            total={total}
             pageSize={pagination.pageSize}
             onPageChange={pagination.setPage}
           />

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Car } from "lucide-react";
 import { useDrivers } from "@/hooks/useDrivers";
-import { usePagination } from "@/hooks/usePagination";
+import { useServerPagination } from "@/hooks/useServerPagination";
 import { DriversTable } from "@/components/drivers/DriversTable";
 import { UserDetailDialog } from "@/components/users/UserDetailDialog";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -22,9 +22,12 @@ export default function DriversPage() {
 
 function DriversPageContent() {
   const [search, setSearch] = useState("");
-  const { data: drivers, isLoading, isError } = useDrivers(search);
+  const pagination = useServerPagination(10);
+  const { data, isLoading, isError } = useDrivers(search, pagination);
   const [selected, setSelected] = useState<AdminUser | null>(null);
-  const pagination = usePagination(drivers ?? []);
+  const drivers = data?.drivers ?? [];
+  const total = data?.total ?? 0;
+  const pageCount = Math.max(1, Math.ceil(total / pagination.pageSize));
 
   return (
     <div className="space-y-4">
@@ -49,7 +52,7 @@ function DriversPageContent() {
           title="Couldn't load drivers"
           description="Something went wrong talking to the API. Try refreshing the page."
         />
-      ) : !drivers || drivers.length === 0 ? (
+      ) : drivers.length === 0 ? (
         <EmptyState
           icon={Car}
           title="No drivers found"
@@ -57,11 +60,11 @@ function DriversPageContent() {
         />
       ) : (
         <>
-          <DriversTable drivers={pagination.pageItems} onView={setSelected} />
+          <DriversTable drivers={drivers} onView={setSelected} />
           <Pagination
             page={pagination.page}
-            pageCount={pagination.pageCount}
-            total={pagination.total}
+            pageCount={pageCount}
+            total={total}
             pageSize={pagination.pageSize}
             onPageChange={pagination.setPage}
           />

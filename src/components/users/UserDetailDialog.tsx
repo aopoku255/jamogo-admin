@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Spinner } from "@/components/ui/Spinner";
 import { useUserDetail, useSuspendUser, useUnsuspendUser } from "@/hooks/useUsers";
+import { useSetDriverCommission } from "@/hooks/useDrivers";
+import { useCurrentAdmin } from "@/hooks/useAdminAuth";
 import type { AdminUser, Trip, UserDetail as UserDetailData } from "@/lib/types";
 
 function formatDate(iso: string) {
@@ -36,6 +38,76 @@ function TripRow({ trip, perspective }: { trip: Trip; perspective: "rider" | "dr
         {trip.status}
       </Badge>
     </div>
+  );
+}
+
+function CommissionEditor({ userId, commissionRate }: { userId: string; commissionRate: string }) {
+  const { hasPermission } = useCurrentAdmin();
+  const setCommission = useSetDriverCommission();
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(() => String(Math.round(Number(commissionRate) * 100)));
+
+  if (!hasPermission("drivers.manage")) {
+    return <span>{Math.round(Number(commissionRate) * 100)}% commission</span>;
+  }
+
+  if (!editing) {
+    return (
+      <button
+        type="button"
+        onClick={() => {
+          setValue(String(Math.round(Number(commissionRate) * 100)));
+          setEditing(true);
+        }}
+        className="underline decoration-dotted underline-offset-2 hover:text-jamogo-ink-900"
+      >
+        {Math.round(Number(commissionRate) * 100)}% commission · edit
+      </button>
+    );
+  }
+
+  function handleSave() {
+    const percent = Number(value);
+    if (!Number.isFinite(percent) || percent < 0 || percent > 100) {
+      toast.error("Enter a commission between 0 and 100%.");
+      return;
+    }
+    setCommission.mutate(
+      { userId, commissionRate: percent / 100 },
+      {
+        onSuccess: () => {
+          toast.success("Commission rate updated.");
+          setEditing(false);
+        },
+        onError: () => toast.error("Couldn't update the commission rate. Try again."),
+      },
+    );
+  }
+
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <input
+        type="number"
+        min={0}
+        max={100}
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        className="w-14 rounded-lg border border-jamogo-gray-300 px-1.5 py-0.5 text-sm outline-none focus:border-jamogo-green-500"
+        autoFocus
+      />
+      %
+      <button
+        type="button"
+        onClick={handleSave}
+        disabled={setCommission.isPending}
+        className="font-medium text-jamogo-green-600 hover:underline disabled:opacity-50"
+      >
+        Save
+      </button>
+      <button type="button" onClick={() => setEditing(false)} className="text-jamogo-gray-500 hover:underline">
+        Cancel
+      </button>
+    </span>
   );
 }
 
@@ -101,6 +173,9 @@ function UserDetailBody({ user, data }: { user: AdminUser; data: UserDetailData 
           <p className="text-jamogo-gray-500">
             {user.driverProfile.isOnline ? "Online" : "Offline"} · Rating{" "}
             {user.driverProfile.rating} · {user.driverProfile.totalTrips} trips
+          </p>
+          <p className="mt-1 text-jamogo-gray-500">
+            <CommissionEditor userId={user.id} commissionRate={user.driverProfile.commissionRate} />
           </p>
         </div>
       )}

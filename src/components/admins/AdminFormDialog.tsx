@@ -16,6 +16,8 @@ const PERMISSION_LABELS: Record<Permission, string> = {
   "admins.manage": "Manage other admins",
   "settings.manage": "Manage configurations",
   "logs.view": "View activity logs",
+  "analytics.view": "View dashboard analytics",
+  "wallet.manage": "Manage wallets & payouts",
 };
 
 export function AdminFormDialog({

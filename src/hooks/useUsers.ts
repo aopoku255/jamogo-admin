@@ -4,14 +4,28 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import type { AdminUser, UserDetail } from "@/lib/types";
 
-export function useUsers(q?: string, enabled = true) {
+/**
+ * The backend caps this at 50 rows per call by default (see the
+ * production-readiness audit's pagination fix) — pass limit/offset to page
+ * through the real dataset instead of only ever seeing the newest 50 users.
+ */
+export function useUsers(
+  q?: string,
+  pagination?: { limit: number; offset: number },
+  enabled = true,
+) {
   return useQuery({
-    queryKey: ["users", q ?? ""],
-    queryFn: () =>
-      api.get<{ users: AdminUser[] }>(
-        `/admin/users${q ? `?q=${encodeURIComponent(q)}` : ""}`,
-      ),
-    select: (data) => data.users,
+    queryKey: ["users", q ?? "", pagination?.limit, pagination?.offset],
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (q) params.set("q", q);
+      if (pagination) {
+        params.set("limit", String(pagination.limit));
+        params.set("offset", String(pagination.offset));
+      }
+      const qs = params.toString();
+      return api.get<{ users: AdminUser[]; total: number }>(`/admin/users${qs ? `?${qs}` : ""}`);
+    },
     enabled,
   });
 }

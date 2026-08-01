@@ -27,8 +27,8 @@ export default function DashboardPage() {
 
   const kyc = usePendingKyc(canKyc);
   const tickets = useSupportTickets(canSupport);
-  const users = useUsers(undefined, canUsers);
-  const drivers = useDrivers(undefined, canDrivers);
+  const users = useUsers(undefined, undefined, canUsers);
+  const drivers = useDrivers(undefined, undefined, canDrivers);
   const trips = useTrips(undefined, canTrips);
   const analytics = useAnalyticsOverview();
 
@@ -61,7 +61,7 @@ export default function DashboardPage() {
           <StatCard
             icon={Users}
             label="Riders"
-            value={users.data?.length}
+            value={users.data?.total}
             isLoading={users.isLoading}
             isError={users.isError}
             href="/users"
@@ -71,7 +71,7 @@ export default function DashboardPage() {
           <StatCard
             icon={Car}
             label="Drivers"
-            value={drivers.data?.length}
+            value={drivers.data?.total}
             isLoading={drivers.isLoading}
             isError={drivers.isError}
             href="/drivers"

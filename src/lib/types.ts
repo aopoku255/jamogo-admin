@@ -13,7 +13,9 @@ export type Permission =
   | "trips.view"
   | "admins.manage"
   | "settings.manage"
-  | "logs.view";
+  | "logs.view"
+  | "analytics.view"
+  | "wallet.manage";
 
 export const ALL_PERMISSIONS: Permission[] = [
   "kyc.review",
@@ -24,13 +26,15 @@ export const ALL_PERMISSIONS: Permission[] = [
   "admins.manage",
   "settings.manage",
   "logs.view",
+  "analytics.view",
+  "wallet.manage",
 ];
 
 export const ROLE_PRESETS: Record<string, Permission[]> = {
   "Super Admin": [...ALL_PERMISSIONS],
   "Support Agent": ["support.manage"],
   "KYC Reviewer": ["kyc.review"],
-  Operations: ["users.manage", "drivers.manage", "trips.view"],
+  Operations: ["users.manage", "drivers.manage", "trips.view", "analytics.view"],
 };
 
 export type SettingCategory = "flags" | "fare" | "ride";
@@ -108,6 +112,7 @@ export type DriverProfile = {
   isOnline: boolean;
   rating: string;
   totalTrips: number;
+  commissionRate: string;
 };
 
 export type AdminUser = {
@@ -179,8 +184,34 @@ export type WalletTransaction = {
   type: "credit" | "debit";
   amount: string;
   description: string;
-  status: "pending" | "completed";
+  status: "pending" | "completed" | "failed";
   createdAt: string;
+};
+
+/** The platform-wide view (GET /admin/wallet-transactions) — includes who it belongs to. */
+export type AdminWalletTransaction = WalletTransaction & {
+  reference: string | null;
+  category: "trip_earning" | "commission" | "topup" | "withdrawal" | "adjustment" | "corider_fare" | null;
+  balanceBefore: string | null;
+  balanceAfter: string | null;
+  user: AdminUserSummary;
+};
+
+export type PayoutStatus = "pending" | "processing" | "paid" | "failed";
+
+export type Payout = {
+  id: string;
+  userId: string;
+  amount: string;
+  channel: "momo" | "telecel" | "bank";
+  destination: Record<string, string>;
+  status: PayoutStatus;
+  provider: string | null;
+  providerReference: string | null;
+  failureReason: string | null;
+  paidAt: string | null;
+  createdAt: string;
+  user: AdminUserSummary;
 };
 
 export type KycSubmissionSummary = {
