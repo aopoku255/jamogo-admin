@@ -32,7 +32,6 @@ export function UsersTable({
             <th className="px-5 py-3">Joined</th>
             <th className="px-5 py-3">User</th>
             <th className="px-5 py-3">Identity</th>
-            <th className="px-5 py-3">Wallet</th>
             <th className="px-5 py-3">Status</th>
             <th className="px-5 py-3" />
           </tr>
@@ -51,7 +50,6 @@ export function UsersTable({
               <td className="px-5 py-4">
                 <Badge tone={IDENTITY_TONE[user.identityStatus]}>{user.identityStatus}</Badge>
               </td>
-              <td className="px-5 py-4 text-jamogo-ink-900">GH₵{user.walletBalance}</td>
               <td className="px-5 py-4">
                 {user.isSuspended ? (
                   <Badge tone="danger">Suspended</Badge>

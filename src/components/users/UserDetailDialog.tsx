@@ -6,10 +6,12 @@ import { Dialog } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Spinner } from "@/components/ui/Spinner";
+import { Switch } from "@/components/ui/Switch";
+import { EditCommissionDialog, WaiveDialog } from "@/components/commission/CommissionDialogs";
 import { useUserDetail, useSuspendUser, useUnsuspendUser } from "@/hooks/useUsers";
 import { useSetDriverCommission } from "@/hooks/useDrivers";
 import { useCurrentAdmin } from "@/hooks/useAdminAuth";
-import type { AdminUser, Trip, UserDetail as UserDetailData } from "@/lib/types";
+import type { AdminUser, CommissionEntry, Trip, UserDetail as UserDetailData } from "@/lib/types";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, {
@@ -41,73 +43,91 @@ function TripRow({ trip, perspective }: { trip: Trip; perspective: "rider" | "dr
   );
 }
 
-function CommissionEditor({ userId, commissionRate }: { userId: string; commissionRate: string }) {
+/**
+ * The driver's commission: on/off switch (off by default — no commission is
+ * recorded while off), rate, what they owe vs their limit, and the latest
+ * ledger entries. Edit rate/limit or clear what's owed from here.
+ */
+function CommissionSection({ user, entries }: { user: AdminUser; entries: CommissionEntry[] }) {
+  const profile = user.driverProfile!;
   const { hasPermission } = useCurrentAdmin();
+  const canManage = hasPermission("drivers.manage");
   const setCommission = useSetDriverCommission();
   const [editing, setEditing] = useState(false);
-  const [value, setValue] = useState(() => String(Math.round(Number(commissionRate) * 100)));
+  const [waiving, setWaiving] = useState(false);
+  const owed = Number(profile.commissionOwed ?? 0);
+  const limit = Number(profile.commissionLimit ?? 0);
+  const rate = Number(profile.commissionRate);
+  const blocked = profile.commissionEnabled && owed > limit;
+  const driver = { userId: user.id, name: user.name, commissionRate: rate, commissionLimit: limit, commissionOwed: owed };
 
-  if (!hasPermission("drivers.manage")) {
-    return <span>{Math.round(Number(commissionRate) * 100)}% commission</span>;
-  }
-
-  if (!editing) {
-    return (
-      <button
-        type="button"
-        onClick={() => {
-          setValue(String(Math.round(Number(commissionRate) * 100)));
-          setEditing(true);
-        }}
-        className="underline decoration-dotted underline-offset-2 hover:text-jamogo-ink-900"
-      >
-        {Math.round(Number(commissionRate) * 100)}% commission · edit
-      </button>
-    );
-  }
-
-  function handleSave() {
-    const percent = Number(value);
-    if (!Number.isFinite(percent) || percent < 0 || percent > 100) {
-      toast.error("Enter a commission between 0 and 100%.");
-      return;
-    }
+  function toggle(on: boolean) {
     setCommission.mutate(
-      { userId, commissionRate: percent / 100 },
+      { userId: user.id, commissionEnabled: on },
       {
-        onSuccess: () => {
-          toast.success("Commission rate updated.");
-          setEditing(false);
-        },
-        onError: () => toast.error("Couldn't update the commission rate. Try again."),
+        onSuccess: () => toast.success(on ? "Commission switched on." : "Commission switched off."),
+        onError: () => toast.error("Couldn't change that. Try again."),
       },
     );
   }
 
   return (
-    <span className="inline-flex items-center gap-1.5">
-      <input
-        type="number"
-        min={0}
-        max={100}
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        className="w-14 rounded-lg border border-jamogo-gray-300 px-1.5 py-0.5 text-sm outline-none focus:border-jamogo-green-500"
-        autoFocus
-      />
-      %
-      <button
-        type="button"
-        onClick={handleSave}
-        disabled={setCommission.isPending}
-        className="font-medium text-jamogo-green-600 hover:underline disabled:opacity-50"
-      >
-        Save
-      </button>
-      <button type="button" onClick={() => setEditing(false)} className="text-jamogo-gray-500 hover:underline">
-        Cancel
-      </button>
-    </span>
+    <div className="rounded-xl border border-jamogo-gray-200 p-3 text-sm">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="font-medium text-jamogo-ink-900">Charge commission</p>
+          <p className="text-jamogo-gray-500">
+            {profile.commissionEnabled
+              ? `${Math.round(rate * 100)}% of each trip · limit GH₵${limit.toFixed(2)}`
+              : "Off — this driver keeps every fare"}
+          </p>
+        </div>
+        {canManage ? (
+          <Switch checked={profile.commissionEnabled} onChange={toggle} />
+        ) : (
+          <Badge tone={profile.commissionEnabled ? "success" : "neutral"}>{profile.commissionEnabled ? "On" : "Off"}</Badge>
+        )}
+      </div>
+      {(profile.commissionEnabled || owed > 0) && (
+        <div className="mt-3 flex items-center justify-between border-t border-jamogo-gray-100 pt-3">
+          <p>
+            <span className={`font-semibold ${blocked ? "text-jamogo-danger" : "text-jamogo-ink-900"}`}>
+              GH₵{owed.toFixed(2)} owed
+            </span>
+            {blocked && <span className="ml-2"><Badge tone="danger">Can&apos;t accept rides</Badge></span>}
+          </p>
+          {canManage && (
+            <span className="space-x-3">
+              <button type="button" onClick={() => setEditing(true)} className="font-medium text-jamogo-green-600 hover:underline">
+                Edit rate & limit
+              </button>
+              {owed > 0 && (
+                <button type="button" onClick={() => setWaiving(true)} className="font-medium text-jamogo-gray-700 hover:underline">
+                  Clear…
+                </button>
+              )}
+            </span>
+          )}
+        </div>
+      )}
+      {entries.length > 0 && (
+        <div className="mt-3 border-t border-jamogo-gray-100 pt-2">
+          {entries.slice(0, 6).map((e) => (
+            <div key={e.id} className="flex justify-between py-1 text-jamogo-gray-700">
+              <span>
+                {e.type === "charge" ? "Trip commission" : e.type === "payment" ? "MoMo payment" : "Cleared by admin"}
+                <span className="text-jamogo-gray-500"> · {formatDate(e.createdAt)}{e.status !== "completed" ? ` · ${e.status}` : ""}</span>
+              </span>
+              <span className={e.type === "charge" ? "" : "text-jamogo-green-600"}>
+                {e.type === "charge" ? "+" : "−"}GH₵{Number(e.amount).toFixed(2)}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+      <EditCommissionDialog driver={editing ? driver : null} onClose={() => setEditing(false)} />
+      <WaiveDialog driver={waiving ? driver : null} onClose={() => setWaiving(false)} />
+    </div>
   );
 }
 
@@ -147,7 +167,7 @@ function UserDetailBody({ user, data }: { user: AdminUser; data: UserDetailData 
             {user.email ? ` · ${user.email}` : ""}
           </p>
           <p className="mt-1 text-sm text-jamogo-gray-500 capitalize">
-            {user.role} · Wallet GH₵{user.walletBalance}
+            {user.role}
           </p>
         </div>
         {user.isSuspended ? (
@@ -156,6 +176,13 @@ function UserDetailBody({ user, data }: { user: AdminUser; data: UserDetailData 
           <Badge tone="success">Active</Badge>
         )}
       </div>
+
+      {(user.noShowCount ?? 0) > 0 && (
+        <p className="rounded-xl bg-jamogo-gray-100 p-3 text-sm text-jamogo-ink-900">
+          No-shows: {user.noShowCount} — times a driver waited out the free time and this rider
+          never came. Not charged; recorded here only.
+        </p>
+      )}
 
       {user.isSuspended && user.suspendedReason && (
         <p className="rounded-xl bg-jamogo-gray-100 p-3 text-sm text-jamogo-ink-900">
@@ -174,11 +201,10 @@ function UserDetailBody({ user, data }: { user: AdminUser; data: UserDetailData 
             {user.driverProfile.isOnline ? "Online" : "Offline"} · Rating{" "}
             {user.driverProfile.rating} · {user.driverProfile.totalTrips} trips
           </p>
-          <p className="mt-1 text-jamogo-gray-500">
-            <CommissionEditor userId={user.id} commissionRate={user.driverProfile.commissionRate} />
-          </p>
         </div>
       )}
+
+      {user.driverProfile && <CommissionSection user={user} entries={data.commissionEntries ?? []} />}
 
       {data.riderTrips.length > 0 && (
         <div>

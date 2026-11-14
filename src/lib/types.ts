@@ -15,7 +15,8 @@ export type Permission =
   | "settings.manage"
   | "logs.view"
   | "analytics.view"
-  | "wallet.manage";
+  | "wallet.manage"
+  | "notifications.send";
 
 export const ALL_PERMISSIONS: Permission[] = [
   "kyc.review",
@@ -28,6 +29,7 @@ export const ALL_PERMISSIONS: Permission[] = [
   "logs.view",
   "analytics.view",
   "wallet.manage",
+  "notifications.send",
 ];
 
 export const ROLE_PRESETS: Record<string, Permission[]> = {
@@ -75,6 +77,25 @@ export type AnalyticsOverview = {
   kycByStatus: { status: KycStatus; count: number }[];
 };
 
+/** GET /admin/analytics/share-search — how "Find co-riders" searches end. */
+export type ShareSearchOutcome = "hosted" | "joined" | "bookedAlone" | "abandoned" | "searching";
+
+export type ShareSearchStats = {
+  days: number;
+  searches: number;
+  outcomes: Record<ShareSearchOutcome, number>;
+  /** % of finished searches that ended in a shared ride; null with none finished. */
+  sharedRate: number | null;
+  requests: {
+    sent: number;
+    accepted: number;
+    declined: number;
+    pending: number;
+    joinedCarOnTheWay: number;
+  };
+  daily: { date: string; searches: number; shared: number }[];
+};
+
 export type KycStatus = "pending" | "approved" | "rejected";
 
 export type KycSubmission = {
@@ -113,6 +134,11 @@ export type DriverProfile = {
   rating: string;
   totalTrips: number;
   commissionRate: string;
+  /** Off by default: no commission is recorded while false. */
+  commissionEnabled: boolean;
+  /** GH₵ of unpaid commission allowed before the driver can't accept rides. */
+  commissionLimit: string;
+  commissionOwed: string;
 };
 
 export type AdminUser = {
@@ -126,10 +152,11 @@ export type AdminUser = {
   emailVerified: boolean;
   identityStatus: IdentityStatus;
   identityVerified: boolean;
-  walletBalance: string;
   isSuspended: boolean;
   suspendedReason: string | null;
   suspendedAt: string | null;
+  /** Times a driver waited out the free time and this rider never came. */
+  noShowCount?: number;
   createdAt: string;
   driverProfile?: DriverProfile | null;
 };
@@ -178,40 +205,37 @@ export type Trip = {
   coRiders?: CoRider[];
 };
 
-export type WalletTransaction = {
+/** One row of the commission ledger (replaces the wallet). */
+export type CommissionEntry = {
   id: string;
-  userId: string;
-  type: "credit" | "debit";
-  amount: string;
-  description: string;
+  driverId: string;
+  /** charge = a completed trip's commission; payment = MoMo via Paystack; waiver = cleared by an admin. */
+  type: "charge" | "payment" | "waiver";
   status: "pending" | "completed" | "failed";
-  createdAt: string;
-};
-
-/** The platform-wide view (GET /admin/wallet-transactions) — includes who it belongs to. */
-export type AdminWalletTransaction = WalletTransaction & {
-  reference: string | null;
-  category: "trip_earning" | "commission" | "topup" | "withdrawal" | "adjustment" | "corider_fare" | null;
-  balanceBefore: string | null;
-  balanceAfter: string | null;
-  user: AdminUserSummary;
-};
-
-export type PayoutStatus = "pending" | "processing" | "paid" | "failed";
-
-export type Payout = {
-  id: string;
-  userId: string;
   amount: string;
-  channel: "momo" | "telecel" | "bank";
-  destination: Record<string, string>;
-  status: PayoutStatus;
+  reference: string;
+  tripId: string | null;
+  fare: string | null;
+  rate: string | null;
+  phone: string | null;
   provider: string | null;
-  providerReference: string | null;
-  failureReason: string | null;
-  paidAt: string | null;
+  note: string | null;
   createdAt: string;
-  user: AdminUserSummary;
+  driver?: AdminUserSummary;
+};
+
+/** A row on the Commission page (GET /admin/commission/drivers). */
+export type CommissionDriver = {
+  userId: string;
+  name: string;
+  phone: string;
+  avatarUrl: string | null;
+  commissionEnabled: boolean;
+  commissionRate: number;
+  commissionLimit: number;
+  commissionOwed: number;
+  blocked: boolean;
+  totalTrips: number;
 };
 
 export type KycSubmissionSummary = {
@@ -224,6 +248,32 @@ export type UserDetail = {
   user: AdminUser;
   riderTrips: Trip[];
   driverTrips: Trip[];
-  transactions: WalletTransaction[];
+  commissionEntries: CommissionEntry[];
   kycSubmissions: KycSubmissionSummary[];
 };
+
+export type NotificationAudience = "all" | "riders" | "drivers" | "user";
+
+export interface AudienceAppStats {
+  users: number;
+  devices: number;
+  configured: boolean;
+}
+
+export interface NotificationAudienceStats {
+  rider: AudienceAppStats;
+  driver: AudienceAppStats;
+}
+
+export interface NotificationAppResult {
+  users: number;
+  devices: number;
+  successCount: number;
+  failureCount: number;
+  error?: "not_configured" | "send_error";
+}
+
+export interface SendNotificationResult {
+  results: { rider: NotificationAppResult; driver: NotificationAppResult };
+  totals: { users: number; devices: number; successCount: number; failureCount: number };
+}

@@ -17,7 +17,8 @@ const PERMISSION_LABELS: Record<Permission, string> = {
   "settings.manage": "Manage configurations",
   "logs.view": "View activity logs",
   "analytics.view": "View dashboard analytics",
-  "wallet.manage": "Manage wallets & payouts",
+  "wallet.manage": "View driver commission",
+  "notifications.send": "Send push notifications",
 };
 
 export function AdminFormDialog({

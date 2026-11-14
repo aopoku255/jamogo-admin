@@ -30,14 +30,37 @@ export function useDrivers(
   });
 }
 
+/** Any subset of a driver's commission settings: on/off, rate (0–1), limit (GH₵). */
 export function useSetDriverCommission() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ userId, commissionRate }: { userId: string; commissionRate: number }) =>
-      api.patch<{ profile: DriverProfile }>(`/admin/drivers/${userId}/commission`, { commissionRate }),
+    mutationFn: ({
+      userId,
+      ...settings
+    }: {
+      userId: string;
+      commissionEnabled?: boolean;
+      commissionRate?: number;
+      commissionLimit?: number;
+    }) => api.patch<{ profile: DriverProfile }>(`/admin/drivers/${userId}/commission`, settings),
     onSuccess: (_data, { userId }) => {
       queryClient.invalidateQueries({ queryKey: ["drivers"] });
+      queryClient.invalidateQueries({ queryKey: ["commission"] });
+      queryClient.invalidateQueries({ queryKey: ["users", "detail", userId] });
+    },
+  });
+}
+
+/** Clears some or all of what a driver owes (e.g. they paid in cash). Omit amount for all of it. */
+export function useWaiveCommission() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ userId, amount, note }: { userId: string; amount?: number; note?: string }) =>
+      api.post<{ owed: number }>(`/admin/drivers/${userId}/commission/waive`, { amount, note }),
+    onSuccess: (_data, { userId }) => {
+      queryClient.invalidateQueries({ queryKey: ["commission"] });
       queryClient.invalidateQueries({ queryKey: ["users", "detail", userId] });
     },
   });

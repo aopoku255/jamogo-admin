@@ -22,6 +22,7 @@ const ACTION_LABELS: Record<string, string> = {
   "admin.update": "Admin updated",
   "admin.reset_password": "Password reset",
   "settings.update": "Settings changed",
+  "notification.send": "Notification sent",
 };
 
 const ACTION_TONE: Record<string, "success" | "warning" | "danger" | "info" | "neutral"> = {
@@ -35,6 +36,7 @@ const ACTION_TONE: Record<string, "success" | "warning" | "danger" | "info" | "n
   "admin.update": "info",
   "admin.reset_password": "warning",
   "settings.update": "neutral",
+  "notification.send": "info",
 };
 
 /** Renders {from, to, reason, ...} as a short readable line instead of raw JSON. */

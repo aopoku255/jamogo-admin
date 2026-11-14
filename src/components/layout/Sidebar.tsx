@@ -11,13 +11,15 @@ import {
   Users,
   Car,
   Route,
-  Wallet,
+  Percent,
   ShieldEllipsis,
   SlidersHorizontal,
   History,
+  Bell,
   LogOut,
   ChevronsLeft,
   ChevronsRight,
+  UsersRound,
 } from "lucide-react";
 import { useCurrentAdmin, useLogout } from "@/hooks/useAdminAuth";
 import type { Permission } from "@/lib/types";
@@ -36,7 +38,9 @@ export const NAV_LINKS: {
   { href: "/users", label: "Users", icon: Users, permission: "users.manage" },
   { href: "/drivers", label: "Drivers", icon: Car, permission: "drivers.manage" },
   { href: "/trips", label: "Trips", icon: Route, permission: "trips.view" },
-  { href: "/wallet", label: "Wallet & Payouts", icon: Wallet, permission: "wallet.manage" },
+  { href: "/co-riders", label: "Co-rider search", icon: UsersRound, permission: "analytics.view" },
+  { href: "/commission", label: "Commission", icon: Percent, permission: "wallet.manage" },
+  { href: "/notifications", label: "Notifications", icon: Bell, permission: "notifications.send" },
   { href: "/admins", label: "Admins", icon: ShieldEllipsis, permission: "admins.manage" },
   { href: "/settings", label: "Configurations", icon: SlidersHorizontal, permission: "settings.manage" },
   { href: "/activity-logs", label: "Activity Logs", icon: History, permission: "logs.view" },

@@ -22,6 +22,7 @@ export const ACTIONS = [
   { value: "admin.update", label: "Admin updated" },
   { value: "admin.reset_password", label: "Password reset" },
   { value: "settings.update", label: "Settings changed" },
+  { value: "notification.send", label: "Notification sent" },
 ];
 
 export default function ActivityLogsPage() {
