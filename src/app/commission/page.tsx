@@ -50,7 +50,7 @@ function CommissionPageContent() {
   return (
     <div className="space-y-4">
       <p className="max-w-3xl text-sm text-jamogo-gray-500">
-        Riders pay drivers directly in cash or MoMo — Jamogo holds no customer funds. Commission is off for every
+        Riders pay drivers directly in cash or MoMo. Jamogo holds no customer funds. Commission is off for every
         driver until you switch it on. Each completed trip then adds the driver&apos;s rate × fare to what they owe;
         once that passes their limit they can&apos;t accept rides until they pay by MoMo.
       </p>
@@ -61,7 +61,7 @@ function CommissionPageContent() {
             type="button"
             onClick={() => setTab(t)}
             className={`rounded-lg px-4 py-1.5 capitalize transition-colors ${
-              tab === t ? "bg-white text-jamogo-ink-900 shadow-sm" : "text-jamogo-gray-500"
+              tab === t ? "bg-card text-jamogo-ink-900 shadow-sm" : "text-jamogo-gray-500"
             }`}
           >
             {t}

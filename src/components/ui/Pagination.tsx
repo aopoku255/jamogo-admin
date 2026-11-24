@@ -19,7 +19,7 @@ export function Pagination({
   const end = Math.min(page * pageSize, total);
 
   return (
-    <div className="flex items-center justify-between px-1 py-1 text-sm">
+    <div className="flex items-center justify-between px-1 pt-1 text-sm">
       <p className="text-jamogo-gray-500">
         Showing {start}–{end} of {total}
       </p>
@@ -33,7 +33,7 @@ export function Pagination({
         >
           <ChevronLeft size={16} />
         </button>
-        <span className="px-1.5 font-medium text-jamogo-ink-900">
+        <span className="rounded-lg border border-jamogo-gray-200 bg-card px-2.5 py-1 text-xs font-medium text-jamogo-ink-900">
           {page} / {pageCount}
         </span>
         <button

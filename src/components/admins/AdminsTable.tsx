@@ -23,10 +23,10 @@ export function AdminsTable({
   onResetPassword: (admin: AdminAccount) => void;
 }) {
   return (
-    <div className="overflow-x-auto rounded-2xl border border-jamogo-gray-200 bg-white">
+    <div className="scrollbar-thin overflow-x-auto rounded-2xl border border-jamogo-gray-200 bg-card shadow-card">
       <table className="w-full text-left text-sm">
         <thead>
-          <tr className="border-b border-jamogo-gray-200 text-xs font-semibold uppercase text-jamogo-gray-500">
+          <tr className="border-b border-jamogo-gray-200 bg-jamogo-gray-50 text-[11px] font-semibold tracking-wider text-jamogo-gray-500 uppercase">
             <th className="px-5 py-3">Admin</th>
             <th className="px-5 py-3">Role</th>
             <th className="px-5 py-3">Last login</th>
@@ -38,26 +38,26 @@ export function AdminsTable({
           {admins.map((admin) => {
             const isSelf = admin.id === currentAdminId;
             return (
-              <tr key={admin.id} className="border-b border-jamogo-gray-100 last:border-0">
-                <td className="px-5 py-4">
+              <tr key={admin.id} className="border-b border-jamogo-gray-100 transition-colors last:border-0 hover:bg-jamogo-gray-50">
+                <td className="px-5 py-3">
                   <p className="font-medium text-jamogo-ink-900">
                     {admin.name}
                     {isSelf && <span className="ml-2 text-xs text-jamogo-gray-500">(you)</span>}
                   </p>
                   <p className="text-jamogo-gray-500">{admin.username}</p>
                 </td>
-                <td className="px-5 py-4 text-jamogo-ink-900">{admin.role}</td>
-                <td className="px-5 py-4 text-jamogo-gray-500">
+                <td className="px-5 py-3 text-jamogo-ink-900">{admin.role}</td>
+                <td className="px-5 py-3 text-jamogo-gray-500">
                   {formatDate(admin.lastLoginAt)}
                 </td>
-                <td className="px-5 py-4">
+                <td className="px-5 py-3">
                   {admin.isActive ? (
                     <Badge tone="success">Active</Badge>
                   ) : (
                     <Badge tone="danger">Deactivated</Badge>
                   )}
                 </td>
-                <td className="px-5 py-4 text-right">
+                <td className="px-5 py-3 text-right">
                   <div className="flex justify-end gap-2">
                     <Button
                       variant="secondary"

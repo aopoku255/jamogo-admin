@@ -69,7 +69,7 @@ function SettingsPageContent() {
     if (updates.length === 0) return;
     update.mutate(updates, {
       onSuccess: () => {
-        toast.success("Settings saved — changes are live immediately.");
+        toast.success("Settings saved. Changes are live immediately.");
         setOverrides({});
       },
       onError: (err) => toast.error(err.message || "Couldn't save settings."),
@@ -150,7 +150,7 @@ function SettingsPageContent() {
       })}
 
       {hasChanges && (
-        <div className="sticky bottom-6 z-10 flex items-center justify-between rounded-2xl border border-jamogo-gray-200 bg-white px-5 py-3 shadow-[0_12px_32px_rgba(14,26,19,0.12)]">
+        <div className="sticky bottom-6 z-10 flex items-center justify-between rounded-2xl border border-jamogo-gray-200 bg-card px-5 py-3 shadow-card-hover">
           <p className="text-sm text-jamogo-gray-500">
             {Object.keys(overrides).length} unsaved change
             {Object.keys(overrides).length === 1 ? "" : "s"}

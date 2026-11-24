@@ -18,10 +18,10 @@ export function KycTable({
   onReview: (submission: KycSubmission) => void;
 }) {
   return (
-    <div className="overflow-x-auto rounded-2xl border border-jamogo-gray-200 bg-white">
+    <div className="scrollbar-thin overflow-x-auto rounded-2xl border border-jamogo-gray-200 bg-card shadow-card">
       <table className="w-full text-left text-sm">
         <thead>
-          <tr className="border-b border-jamogo-gray-200 text-xs font-semibold uppercase text-jamogo-gray-500">
+          <tr className="border-b border-jamogo-gray-200 bg-jamogo-gray-50 text-[11px] font-semibold tracking-wider text-jamogo-gray-500 uppercase">
             <th className="px-5 py-3">Submitted</th>
             <th className="px-5 py-3">User</th>
             <th className="px-5 py-3">Status</th>
@@ -30,18 +30,18 @@ export function KycTable({
         </thead>
         <tbody>
           {submissions.map((submission) => (
-            <tr key={submission.id} className="border-b border-jamogo-gray-100 last:border-0">
-              <td className="px-5 py-4 text-jamogo-gray-500">
+            <tr key={submission.id} className="border-b border-jamogo-gray-100 transition-colors last:border-0 hover:bg-jamogo-gray-50">
+              <td className="px-5 py-3 text-jamogo-gray-500">
                 {formatDate(submission.createdAt)}
               </td>
-              <td className="px-5 py-4">
+              <td className="px-5 py-3">
                 <p className="font-medium text-jamogo-ink-900">{submission.user.name}</p>
                 <p className="text-jamogo-gray-500">{submission.user.phone}</p>
               </td>
-              <td className="px-5 py-4">
+              <td className="px-5 py-3">
                 <Badge tone="warning">{submission.status}</Badge>
               </td>
-              <td className="px-5 py-4 text-right">
+              <td className="px-5 py-3 text-right">
                 <Button variant="secondary" onClick={() => onReview(submission)}>
                   Review
                 </Button>

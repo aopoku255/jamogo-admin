@@ -237,7 +237,7 @@ function NotificationsPageContent() {
         <Card>
           <h3 className="font-heading text-sm font-semibold text-jamogo-ink-900">Preview</h3>
           <div className="mt-4 rounded-2xl bg-jamogo-gray-100 p-3">
-            <div className="flex gap-3 rounded-xl bg-white p-3 shadow-sm">
+            <div className="flex gap-3 rounded-xl bg-card p-3 shadow-sm">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-jamogo-green-500 text-white">
                 <Bell size={16} />
               </div>
@@ -327,7 +327,7 @@ function UserPicker({
           type="button"
           onClick={() => onSelect(null)}
           aria-label="Clear selected user"
-          className="rounded-full p-1 text-jamogo-gray-500 hover:bg-white hover:text-jamogo-ink-900"
+          className="rounded-full p-1 text-jamogo-gray-500 hover:bg-card hover:text-jamogo-ink-900"
         >
           <X size={16} />
         </button>

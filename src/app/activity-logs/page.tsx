@@ -49,7 +49,7 @@ function ActivityLogsPageContent() {
               setAction(e.target.value);
               pagination.setPage(1);
             }}
-            className="rounded-xl border border-jamogo-gray-300 bg-white px-3 py-2 text-sm font-medium text-jamogo-ink-900 outline-none focus:border-jamogo-green-500"
+            className="rounded-xl border border-jamogo-gray-300 bg-card px-3 py-2 text-sm font-medium text-jamogo-ink-900 outline-none focus:border-jamogo-green-500"
           >
             {ACTIONS.map((a) => (
               <option key={a.value} value={a.value}>

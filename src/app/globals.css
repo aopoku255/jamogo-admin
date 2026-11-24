@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+/* Dark mode follows the `.dark` class on <html> (set by the theme toggle,
+   see lib/theme.ts), not only the OS setting. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Jamogo palette. Every page uses these names (text-jamogo-ink-900,
+ * bg-jamogo-gray-100, border-jamogo-gray-200, bg-card…), and each one has a
+ * light and a dark value — so the whole admin switches theme without any
+ * page knowing about it.
+ */
 :root {
   --color-green-600: #17853d;
   --color-green-500: #1fa84c;
@@ -14,7 +24,9 @@
   --color-gray-300: #d3d9d5;
   --color-gray-200: #e6eae8;
   --color-gray-100: #f2f5f3;
-  --color-bg: #f7f9f8;
+  --color-gray-50: #f8faf9;
+  --color-bg: #f5f8f6;
+  --color-card: #ffffff;
   --color-white: #ffffff;
 
   --color-warning-500: #f5a623;
@@ -22,13 +34,56 @@
   --color-info-500: #2e6be6;
   --color-danger-500: #e5484d;
 
-  --background: var(--color-white);
+  /* Sidebar: deep Jamogo green, in both themes. */
+  --color-sidebar: #0f2418;
+  --color-sidebar-foreground: #c3d3c9;
+  --color-sidebar-border: #1d3a29;
+  --color-sidebar-accent: #1a3a27;
+
+  --card-shadow: 0 1px 2px rgba(14, 26, 19, 0.04), 0 1px 3px rgba(14, 26, 19, 0.03);
+  --card-shadow-hover: 0 10px 30px -12px rgba(14, 26, 19, 0.18);
+
+  --background: var(--color-bg);
   --foreground: var(--color-ink-900);
+}
+
+.dark {
+  --color-green-600: #3fcf72;
+  --color-green-500: #1fa84c;
+  --color-green-300: #2c7a47;
+  --color-green-100: #163322;
+  --color-green-50: #11281a;
+
+  --color-ink-900: #e7eee9;
+  --color-gray-700: #c1ccc5;
+  --color-gray-500: #8d9b93;
+  --color-gray-400: #67766d;
+  --color-gray-300: #2e3d35;
+  --color-gray-200: #223029;
+  --color-gray-100: #18231d;
+  --color-gray-50: #141e18;
+  --color-bg: #0a110d;
+  --color-card: #101913;
+
+  --color-warning-500: #f7b23e;
+  --color-info-500: #5b8ef0;
+  --color-danger-500: #ef6467;
+
+  --color-sidebar: #08130c;
+  --color-sidebar-foreground: #b7c7bd;
+  --color-sidebar-border: #15281c;
+  --color-sidebar-accent: #13301f;
+
+  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --card-shadow-hover: 0 10px 30px -12px rgba(0, 0, 0, 0.6);
+
+  color-scheme: dark;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card: var(--color-card);
 
   --color-jamogo-green-600: var(--color-green-600);
   --color-jamogo-green-500: var(--color-green-500);
@@ -43,6 +98,7 @@
   --color-jamogo-gray-300: var(--color-gray-300);
   --color-jamogo-gray-200: var(--color-gray-200);
   --color-jamogo-gray-100: var(--color-gray-100);
+  --color-jamogo-gray-50: var(--color-gray-50);
   --color-jamogo-bg: var(--color-bg);
 
   --color-jamogo-warning: var(--color-warning-500);
@@ -50,13 +106,57 @@
   --color-jamogo-info: var(--color-info-500);
   --color-jamogo-danger: var(--color-danger-500);
 
+  --color-sidebar: var(--color-sidebar);
+  --color-sidebar-foreground: var(--color-sidebar-foreground);
+  --color-sidebar-border: var(--color-sidebar-border);
+  --color-sidebar-accent: var(--color-sidebar-accent);
+
+  --shadow-card: var(--card-shadow);
+  --shadow-card-hover: var(--card-shadow-hover);
+
   --font-sans: var(--font-inter);
   --font-heading: var(--font-poppins);
+
+  --animate-fade-in: fade-in 0.25s ease-out;
+  --animate-pop-in: pop-in 0.18s ease-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 body {
-  background: var(--color-jamogo-bg);
+  background: var(--color-bg);
   color: var(--foreground);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+/* Thin scrollbars for the sidebar and tables. */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--color-gray-300);
+  border-radius: 9999px;
 }
 
 /* recharts gives its root <svg> tabIndex={0} for keyboard accessibility —

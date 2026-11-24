@@ -4,56 +4,101 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  ShieldCheck,
-  LifeBuoy,
-  Users,
-  Car,
-  Route,
-  Percent,
-  ShieldEllipsis,
-  SlidersHorizontal,
-  History,
-  Bell,
-  LogOut,
-  ChevronsLeft,
-  ChevronsRight,
-  UsersRound,
-} from "lucide-react";
-import { useCurrentAdmin, useLogout } from "@/hooks/useAdminAuth";
-import type { Permission } from "@/lib/types";
+import { ChevronsLeft, ChevronsRight } from "lucide-react";
+import { useCurrentAdmin } from "@/hooks/useAdminAuth";
+import { NAV_GROUPS, type NavGroup } from "@/lib/nav";
 
 const COLLAPSED_STORAGE_KEY = "jamogo-sidebar-collapsed";
 
-export const NAV_LINKS: {
-  href: string;
-  label: string;
-  icon: typeof LayoutDashboard;
-  permission?: Permission;
-}[] = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/kyc", label: "KYC Review", icon: ShieldCheck, permission: "kyc.review" },
-  { href: "/support", label: "Support Tickets", icon: LifeBuoy, permission: "support.manage" },
-  { href: "/users", label: "Users", icon: Users, permission: "users.manage" },
-  { href: "/drivers", label: "Drivers", icon: Car, permission: "drivers.manage" },
-  { href: "/trips", label: "Trips", icon: Route, permission: "trips.view" },
-  { href: "/co-riders", label: "Co-rider search", icon: UsersRound, permission: "analytics.view" },
-  { href: "/commission", label: "Commission", icon: Percent, permission: "wallet.manage" },
-  { href: "/notifications", label: "Notifications", icon: Bell, permission: "notifications.send" },
-  { href: "/admins", label: "Admins", icon: ShieldEllipsis, permission: "admins.manage" },
-  { href: "/settings", label: "Configurations", icon: SlidersHorizontal, permission: "settings.manage" },
-  { href: "/activity-logs", label: "Activity Logs", icon: History, permission: "logs.view" },
-];
+/** The groups and links this admin is allowed to see. */
+export function useVisibleNav(): NavGroup[] {
+  const { hasPermission } = useCurrentAdmin();
+  return NAV_GROUPS.map((g) => ({
+    ...g,
+    links: g.links.filter((l) => !l.permission || hasPermission(l.permission)),
+  })).filter((g) => g.links.length > 0);
+}
 
-export function Sidebar() {
+/** The nav links, shared by the desktop sidebar and the mobile menu. */
+export function NavLinks({
+  collapsed = false,
+  onNavigate,
+}: {
+  collapsed?: boolean;
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
-  const logout = useLogout();
-  const { data: admin, hasPermission } = useCurrentAdmin();
+  const groups = useVisibleNav();
+
+  return (
+    <nav className="scrollbar-thin flex-1 space-y-4 overflow-y-auto px-2.5 py-4">
+      {groups.map((group, i) => (
+        <div key={group.heading ?? i} className="space-y-0.5">
+          {group.heading &&
+            (collapsed ? (
+              <div className="mx-3 mb-2 border-t border-sidebar-border" />
+            ) : (
+              <p className="px-3 pb-1.5 text-[11px] font-semibold tracking-wider text-sidebar-foreground/45 uppercase">
+                {group.heading}
+              </p>
+            ))}
+          {group.links.map((link) => {
+            const active =
+              link.href === "/"
+                ? pathname === "/"
+                : pathname === link.href || pathname.startsWith(`${link.href}/`);
+            const Icon = link.icon;
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={onNavigate}
+                title={collapsed ? link.label : undefined}
+                className={`group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
+                  collapsed ? "justify-center" : ""
+                } ${
+                  active
+                    ? "bg-sidebar-accent text-white shadow-sm"
+                    : "text-sidebar-foreground/75 hover:bg-sidebar-accent/60 hover:text-white"
+                }`}
+              >
+                {active && (
+                  <span className="absolute top-1/2 left-0 h-5 w-1 -translate-y-1/2 rounded-r-full bg-jamogo-green-500" />
+                )}
+                <Icon
+                  size={18}
+                  className={`shrink-0 ${active ? "text-jamogo-green-500" : ""}`}
+                />
+                {!collapsed && <span className="truncate">{link.label}</span>}
+              </Link>
+            );
+          })}
+        </div>
+      ))}
+    </nav>
+  );
+}
+
+export function SidebarBrand({ collapsed = false }: { collapsed?: boolean }) {
+  return (
+    <div className="flex h-16 shrink-0 items-center gap-2.5 border-b border-sidebar-border px-4">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white shadow-[0_0_20px_rgba(31,168,76,0.35)]">
+        <Image src="/favicon-48.png" alt="Jamogo" width={26} height={26} />
+      </div>
+      {!collapsed && (
+        <div className="flex animate-fade-in flex-col leading-tight">
+          <span className="text-sm font-bold tracking-tight text-white">Jamogo Admin</span>
+          <span className="text-[11px] text-sidebar-foreground/55">Ride operations</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Desktop sidebar: deep Jamogo green, collapsible to icons. */
+export function Sidebar() {
   // Lazy-init from localStorage: safe here because Sidebar only ever mounts
-  // client-side, after AdminGate's auth check resolves — it's never part of
-  // the server-rendered (pre-hydration) tree, so there's no hydration
-  // mismatch to worry about.
+  // client-side, after AdminGate's auth check resolves.
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof window === "undefined") return false;
     try {
@@ -62,10 +107,6 @@ export function Sidebar() {
       return false;
     }
   });
-
-  const visibleLinks = NAV_LINKS.filter(
-    (link) => !link.permission || hasPermission(link.permission),
-  );
 
   function toggleCollapsed() {
     setCollapsed((prev) => {
@@ -81,77 +122,21 @@ export function Sidebar() {
 
   return (
     <aside
-      className={`flex h-screen shrink-0 flex-col border-r border-jamogo-gray-200 bg-white transition-[width] duration-200 ${
-        collapsed ? "w-20" : "w-64"
+      className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-[width] duration-300 lg:flex ${
+        collapsed ? "w-19" : "w-64"
       }`}
     >
-      <div className="flex h-16 items-center justify-between px-4">
-        {collapsed ? (
-          <Image
-            src="/favicon-48.png"
-            alt="Jamogo"
-            width={28}
-            height={28}
-            className="mx-auto"
-          />
-        ) : (
-          <Image src="/brand/logo.png" alt="Jamogo" width={112} height={30} priority />
-        )}
-      </div>
-
-      <nav className="flex-1 space-y-1 px-3">
-        {visibleLinks.map((link) => {
-          const active = pathname === link.href;
-          const Icon = link.icon;
-          return (
-            <Link
-              key={link.href}
-              href={link.href}
-              title={collapsed ? link.label : undefined}
-              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium transition-colors ${
-                collapsed ? "justify-center" : ""
-              } ${
-                active
-                  ? "bg-jamogo-green-50 text-jamogo-green-600"
-                  : "text-jamogo-gray-700 hover:bg-jamogo-gray-100"
-              }`}
-            >
-              <Icon size={18} className="shrink-0" />
-              {!collapsed && link.label}
-            </Link>
-          );
-        })}
-      </nav>
-
-      <div className="border-t border-jamogo-gray-200 p-3">
+      <SidebarBrand collapsed={collapsed} />
+      <NavLinks collapsed={collapsed} />
+      <div className="border-t border-sidebar-border p-2.5">
         <button
           type="button"
           onClick={toggleCollapsed}
           title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className={`mb-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium text-jamogo-gray-500 transition-colors hover:bg-jamogo-gray-100 ${
-            collapsed ? "justify-center" : ""
-          }`}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="flex w-full items-center justify-center gap-2 rounded-lg py-2 text-sidebar-foreground/60 transition-colors hover:bg-sidebar-accent/60 hover:text-white"
         >
-          {collapsed ? <ChevronsRight size={18} /> : <ChevronsLeft size={18} />}
-          {!collapsed && "Collapse"}
-        </button>
-
-        {admin && !collapsed && (
-          <div className="px-3 py-2">
-            <p className="truncate text-sm font-medium text-jamogo-ink-900">{admin.name}</p>
-            <p className="truncate text-xs text-jamogo-gray-500">{admin.role}</p>
-          </div>
-        )}
-        <button
-          type="button"
-          onClick={logout}
-          title={collapsed ? "Sign out" : undefined}
-          className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium text-jamogo-gray-500 transition-colors hover:bg-jamogo-gray-100 ${
-            collapsed ? "justify-center" : ""
-          }`}
-        >
-          <LogOut size={18} className="shrink-0" />
-          {!collapsed && "Sign out"}
+          {collapsed ? <ChevronsRight size={16} /> : <ChevronsLeft size={16} />}
         </button>
       </div>
     </aside>

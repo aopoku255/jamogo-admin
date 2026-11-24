@@ -11,7 +11,7 @@ function formatDate(iso: string) {
   });
 }
 
-const ACTION_LABELS: Record<string, string> = {
+export const ACTION_LABELS: Record<string, string> = {
   "kyc.decide": "KYC decision",
   "driver_document.decide": "Driver document",
   "driver.approval": "Driver approval",
@@ -59,10 +59,10 @@ function formatMetadata(metadata: ActivityLog["metadata"]) {
 
 export function ActivityLogsTable({ logs }: { logs: ActivityLog[] }) {
   return (
-    <div className="overflow-x-auto rounded-2xl border border-jamogo-gray-200 bg-white">
+    <div className="scrollbar-thin overflow-x-auto rounded-2xl border border-jamogo-gray-200 bg-card shadow-card">
       <table className="w-full text-left text-sm">
         <thead>
-          <tr className="border-b border-jamogo-gray-200 text-xs font-semibold uppercase text-jamogo-gray-500">
+          <tr className="border-b border-jamogo-gray-200 bg-jamogo-gray-50 text-[11px] font-semibold tracking-wider text-jamogo-gray-500 uppercase">
             <th className="px-5 py-3">When</th>
             <th className="px-5 py-3">Admin</th>
             <th className="px-5 py-3">Action</th>
@@ -72,20 +72,20 @@ export function ActivityLogsTable({ logs }: { logs: ActivityLog[] }) {
         </thead>
         <tbody>
           {logs.map((log) => (
-            <tr key={log.id} className="border-b border-jamogo-gray-100 last:border-0">
-              <td className="whitespace-nowrap px-5 py-4 text-jamogo-gray-500">
+            <tr key={log.id} className="border-b border-jamogo-gray-100 transition-colors last:border-0 hover:bg-jamogo-gray-50">
+              <td className="whitespace-nowrap px-5 py-3 text-jamogo-gray-500">
                 {formatDate(log.createdAt)}
               </td>
-              <td className="px-5 py-4">
+              <td className="px-5 py-3">
                 <p className="font-medium text-jamogo-ink-900">{log.admin.name}</p>
                 <p className="text-jamogo-gray-500">{log.admin.username}</p>
               </td>
-              <td className="px-5 py-4">
+              <td className="px-5 py-3">
                 <Badge tone={ACTION_TONE[log.action] ?? "neutral"}>
                   {ACTION_LABELS[log.action] ?? log.action}
                 </Badge>
               </td>
-              <td className="px-5 py-4 text-jamogo-gray-500">
+              <td className="px-5 py-3 text-jamogo-gray-500">
                 {log.targetType ? (
                   <>
                     <span className="text-jamogo-ink-900">{log.targetType}</span>
@@ -99,7 +99,7 @@ export function ActivityLogsTable({ logs }: { logs: ActivityLog[] }) {
                   "—"
                 )}
               </td>
-              <td className="max-w-xs px-5 py-4 text-jamogo-gray-500">
+              <td className="max-w-xs px-5 py-3 text-jamogo-gray-500">
                 {formatMetadata(log.metadata) || "—"}
               </td>
             </tr>

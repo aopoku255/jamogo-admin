@@ -28,5 +28,6 @@ export const KYC_STATUS_COLORS: Record<string, string> = {
   rejected: CRITICAL,
 };
 
-export const AXIS_TEXT_COLOR = "#6a756e"; // jamogo-gray-500
-export const GRID_COLOR = "#e6eae8"; // jamogo-gray-200
+// Theme variables, so axes and grid lines follow light/dark mode.
+export const AXIS_TEXT_COLOR = "var(--color-gray-500)";
+export const GRID_COLOR = "var(--color-gray-200)";

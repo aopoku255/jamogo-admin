@@ -1,5 +1,7 @@
 "use client";
 
+// No longer used: trips open on their own page (app/trips/[id]). Safe to delete.
+
 import { Dialog } from "@/components/ui/Dialog";
 import { Badge } from "@/components/ui/Badge";
 import { Spinner } from "@/components/ui/Spinner";
@@ -22,7 +24,8 @@ export function TripDetailDialog({
   tripId: string | null;
   onClose: () => void;
 }) {
-  const { data: trip, isLoading } = useTripDetail(tripId);
+  const { data, isLoading } = useTripDetail(tripId);
+  const trip = data?.trip;
 
   return (
     <Dialog open={!!tripId} onClose={onClose} title="Trip detail">

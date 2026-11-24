@@ -5,12 +5,11 @@ import { Route } from "lucide-react";
 import { useTrips } from "@/hooks/useTrips";
 import { usePagination } from "@/hooks/usePagination";
 import { TripsTable } from "@/components/trips/TripsTable";
-import { TripDetailDialog } from "@/components/trips/TripDetailDialog";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Spinner } from "@/components/ui/Spinner";
 import { Pagination } from "@/components/ui/Pagination";
 import { RequirePermission } from "@/components/RequirePermission";
-import type { Trip, TripStatus } from "@/lib/types";
+import type { TripStatus } from "@/lib/types";
 
 type Filter = "all" | TripStatus;
 
@@ -34,7 +33,6 @@ export default function TripsPage() {
 function TripsPageContent() {
   const [filter, setFilter] = useState<Filter>("all");
   const { data: trips, isLoading, isError } = useTrips(filter);
-  const [selected, setSelected] = useState<Trip | null>(null);
   const pagination = usePagination(trips ?? []);
 
   return (
@@ -51,7 +49,7 @@ function TripsPageContent() {
             className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
               filter === f.value
                 ? "bg-jamogo-green-500 text-white"
-                : "bg-white text-jamogo-gray-700 hover:bg-jamogo-gray-100"
+                : "bg-card text-jamogo-gray-700 hover:bg-jamogo-gray-100"
             }`}
           >
             {f.label}
@@ -73,7 +71,7 @@ function TripsPageContent() {
         <EmptyState icon={Route} title="No trips found" description="Nothing matches this filter right now." />
       ) : (
         <>
-          <TripsTable trips={pagination.pageItems} onView={setSelected} />
+          <TripsTable trips={pagination.pageItems} />
           <Pagination
             page={pagination.page}
             pageCount={pagination.pageCount}
@@ -83,8 +81,6 @@ function TripsPageContent() {
           />
         </>
       )}
-
-      <TripDetailDialog tripId={selected?.id ?? null} onClose={() => setSelected(null)} />
     </div>
   );
 }

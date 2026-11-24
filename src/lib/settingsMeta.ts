@@ -52,14 +52,15 @@ export const SETTINGS_META: Record<string, SettingMeta> = {
     step: 0.5,
     unit: "GH₵",
   },
-  "fare.shareMultiplier": {
-    label: "Share-mode discount",
-    description: "Share-mode fare = solo fare × this multiplier.",
+  "fare.shareDriverBonus": {
+    label: "Shared-ride driver bonus",
+    description:
+      "On a shared ride, the distance riders share is split between them, plus this much extra per added booking for the driver. 0.07: two riders on a ₵50 route pay ₵27 each (driver ₵54); three pay ₵19 each (driver ₵57).",
     type: "number",
     min: 0,
-    max: 1,
-    step: 0.05,
-    unit: "× solo fare",
+    max: 0.5,
+    step: 0.01,
+    unit: "per extra rider",
   },
   "fare.minimumBidRatio": {
     label: "Minimum bid ratio",
@@ -117,7 +118,7 @@ export const SETTINGS_META: Record<string, SettingMeta> = {
   },
   "share.maxDetourMinutes": {
     label: "Co-rider detour limit",
-    description: "The most a new co-rider may add to anyone's ride — the rider who booked and the co-rider themselves. Lets riders going part of the way join, and riders join a car already on its way.",
+    description: "The most a new co-rider may add to anyone's ride: the rider who booked and the co-rider themselves. Lets riders going part of the way join, and riders join a car already on its way.",
     type: "integer",
     min: 1,
     max: 30,

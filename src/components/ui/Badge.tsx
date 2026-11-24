@@ -8,6 +8,14 @@ const TONE_CLASSES: Record<BadgeTone, string> = {
   neutral: "bg-jamogo-gray-100 text-jamogo-gray-500",
 };
 
+const DOT_CLASSES: Record<BadgeTone, string> = {
+  warning: "bg-jamogo-warning",
+  success: "bg-jamogo-green-500",
+  danger: "bg-jamogo-danger",
+  info: "bg-jamogo-info",
+  neutral: "bg-jamogo-gray-400",
+};
+
 export function Badge({
   tone = "neutral",
   children,
@@ -17,9 +25,13 @@ export function Badge({
 }) {
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${TONE_CLASSES[tone]}`}
+      className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-semibold whitespace-nowrap ${TONE_CLASSES[tone]}`}
     >
-      {children}
+      <span
+        className={`h-1.5 w-1.5 shrink-0 rounded-full ${DOT_CLASSES[tone]}`}
+      />
+      {/* Capitalise the first letter only ("completed" → "Completed", "Shared · 2 bookings" stays). */}
+      <span className="inline-block first-letter:uppercase">{children}</span>
     </span>
   );
 }

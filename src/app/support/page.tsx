@@ -68,7 +68,7 @@ function SupportPageContent() {
             className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
               filter === f.value
                 ? "bg-jamogo-green-500 text-white"
-                : "bg-white text-jamogo-gray-700 hover:bg-jamogo-gray-100"
+                : "bg-card text-jamogo-gray-700 hover:bg-jamogo-gray-100"
             }`}
           >
             {f.label}

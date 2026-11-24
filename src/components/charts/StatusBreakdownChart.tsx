@@ -18,7 +18,7 @@ function DonutTooltip({
   const { status, count } = payload[0].payload;
 
   return (
-    <div className="rounded-xl border border-jamogo-gray-200 bg-white px-3 py-2 text-xs shadow-[0_8px_24px_rgba(14,26,19,0.12)]">
+    <div className="rounded-xl border border-jamogo-gray-200 bg-card px-3 py-2 text-xs shadow-card-hover">
       <p className="font-semibold text-jamogo-ink-900 capitalize">{status}</p>
       <p className="text-jamogo-gray-700">
         {count} {count === 1 ? unit : `${unit}s`}
@@ -40,18 +40,33 @@ export function StatusBreakdownChart({
   data,
   colors,
   unit = "item",
+  stacked = false,
 }: {
   title: string;
   subtitle?: string;
   data: Datum[];
   colors: Record<string, string>;
   unit?: string;
+  /** Donut above the list, for narrow cards (side by side doesn't fit). */
+  stacked?: boolean;
 }) {
   const total = data.reduce((sum, d) => sum + d.count, 0);
 
+  if (total === 0) {
+    return (
+      <ChartCard title={title} subtitle={subtitle}>
+        <div className="flex h-[180px] items-center justify-center text-sm text-jamogo-gray-500">
+          No {unit}s yet
+        </div>
+      </ChartCard>
+    );
+  }
+
   return (
     <ChartCard title={title} subtitle={subtitle}>
-      <div className="flex flex-col items-center gap-6 sm:flex-row">
+      <div
+        className={`flex flex-col items-center gap-6 ${stacked ? "" : "sm:flex-row"}`}
+      >
         <div className="relative h-[180px] w-[180px] shrink-0">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -68,13 +83,18 @@ export function StatusBreakdownChart({
                 isAnimationActive={false}
               >
                 {data.map((entry) => (
-                  <Cell key={entry.status} fill={colors[entry.status] ?? "#9aa39d"} />
+                  <Cell
+                    key={entry.status}
+                    fill={colors[entry.status] ?? "#9aa39d"}
+                  />
                 ))}
               </Pie>
             </PieChart>
           </ResponsiveContainer>
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-            <p className="font-heading text-2xl font-bold text-jamogo-ink-900">{total}</p>
+            <p className="font-heading text-2xl font-bold text-jamogo-ink-900">
+              {total}
+            </p>
             <p className="text-xs text-jamogo-gray-500">total</p>
           </div>
         </div>
@@ -83,17 +103,28 @@ export function StatusBreakdownChart({
           {data.map((entry) => {
             const pct = total > 0 ? Math.round((entry.count / total) * 100) : 0;
             return (
-              <div key={entry.status} className="flex items-center justify-between gap-3 text-sm">
+              <div
+                key={entry.status}
+                className="flex items-center justify-between gap-3 text-sm"
+              >
                 <div className="flex items-center gap-2">
                   <span
                     className="h-2.5 w-2.5 shrink-0 rounded-full"
-                    style={{ backgroundColor: colors[entry.status] ?? "#9aa39d" }}
+                    style={{
+                      backgroundColor: colors[entry.status] ?? "#9aa39d",
+                    }}
                   />
-                  <span className="text-jamogo-ink-900 capitalize">{entry.status}</span>
+                  <span className="text-jamogo-ink-900 capitalize">
+                    {entry.status}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-jamogo-ink-900">{entry.count}</span>
-                  <span className="w-9 text-right text-jamogo-gray-500 tabular-nums">{pct}%</span>
+                  <span className="font-medium text-jamogo-ink-900">
+                    {entry.count}
+                  </span>
+                  <span className="w-9 text-right text-jamogo-gray-500 tabular-nums">
+                    {pct}%
+                  </span>
                 </div>
               </div>
             );

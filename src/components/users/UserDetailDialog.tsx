@@ -1,5 +1,7 @@
 "use client";
 
+// No longer used: people open on their own page (app/users/[id], app/drivers/[id]). Safe to delete.
+
 import { useState } from "react";
 import { toast } from "sonner";
 import { Dialog } from "@/components/ui/Dialog";
@@ -79,7 +81,7 @@ function CommissionSection({ user, entries }: { user: AdminUser; entries: Commis
           <p className="text-jamogo-gray-500">
             {profile.commissionEnabled
               ? `${Math.round(rate * 100)}% of each trip · limit GH₵${limit.toFixed(2)}`
-              : "Off — this driver keeps every fare"}
+              : "Off. This driver keeps every fare"}
           </p>
         </div>
         {canManage ? (
@@ -179,7 +181,7 @@ function UserDetailBody({ user, data }: { user: AdminUser; data: UserDetailData 
 
       {(user.noShowCount ?? 0) > 0 && (
         <p className="rounded-xl bg-jamogo-gray-100 p-3 text-sm text-jamogo-ink-900">
-          No-shows: {user.noShowCount} — times a driver waited out the free time and this rider
+          No-shows: {user.noShowCount}: times a driver waited out the free time and this rider
           never came. Not charged; recorded here only.
         </p>
       )}

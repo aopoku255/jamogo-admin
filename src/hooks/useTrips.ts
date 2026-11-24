@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import type { Trip, TripStatus } from "@/lib/types";
+import type { Trip, TripDetail, TripStatus } from "@/lib/types";
 
 export function useTrips(status?: TripStatus | "all", enabled = true) {
   const filter = status && status !== "all" ? status : undefined;
@@ -18,8 +18,7 @@ export function useTrips(status?: TripStatus | "all", enabled = true) {
 export function useTripDetail(id: string | null) {
   return useQuery({
     queryKey: ["trips", "detail", id],
-    queryFn: () => api.get<{ trip: Trip }>(`/admin/trips/${id}`),
-    select: (data) => data.trip,
+    queryFn: () => api.get<TripDetail>(`/admin/trips/${id}`),
     enabled: !!id,
   });
 }

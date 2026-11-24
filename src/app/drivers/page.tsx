@@ -5,12 +5,10 @@ import { Car } from "lucide-react";
 import { useDrivers } from "@/hooks/useDrivers";
 import { useServerPagination } from "@/hooks/useServerPagination";
 import { DriversTable } from "@/components/drivers/DriversTable";
-import { UserDetailDialog } from "@/components/users/UserDetailDialog";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Spinner } from "@/components/ui/Spinner";
 import { Pagination } from "@/components/ui/Pagination";
 import { RequirePermission } from "@/components/RequirePermission";
-import type { AdminUser } from "@/lib/types";
 
 export default function DriversPage() {
   return (
@@ -24,7 +22,6 @@ function DriversPageContent() {
   const [search, setSearch] = useState("");
   const pagination = useServerPagination(10);
   const { data, isLoading, isError } = useDrivers(search, pagination);
-  const [selected, setSelected] = useState<AdminUser | null>(null);
   const drivers = data?.drivers ?? [];
   const total = data?.total ?? 0;
   const pageCount = Math.max(1, Math.ceil(total / pagination.pageSize));
@@ -60,7 +57,7 @@ function DriversPageContent() {
         />
       ) : (
         <>
-          <DriversTable drivers={drivers} onView={setSelected} />
+          <DriversTable drivers={drivers} />
           <Pagination
             page={pagination.page}
             pageCount={pageCount}
@@ -70,8 +67,6 @@ function DriversPageContent() {
           />
         </>
       )}
-
-      <UserDetailDialog userId={selected?.id ?? null} onClose={() => setSelected(null)} />
     </div>
   );
 }

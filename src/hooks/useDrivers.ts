@@ -24,7 +24,9 @@ export function useDrivers(
         params.set("offset", String(pagination.offset));
       }
       const qs = params.toString();
-      return api.get<{ drivers: AdminUser[]; total: number }>(`/admin/drivers${qs ? `?${qs}` : ""}`);
+      return api.get<{ drivers: AdminUser[]; total: number }>(
+        `/admin/drivers${qs ? `?${qs}` : ""}`,
+      );
     },
     enabled,
   });
@@ -43,7 +45,11 @@ export function useSetDriverCommission() {
       commissionEnabled?: boolean;
       commissionRate?: number;
       commissionLimit?: number;
-    }) => api.patch<{ profile: DriverProfile }>(`/admin/drivers/${userId}/commission`, settings),
+    }) =>
+      api.patch<{ profile: DriverProfile }>(
+        `/admin/drivers/${userId}/commission`,
+        settings,
+      ),
     onSuccess: (_data, { userId }) => {
       queryClient.invalidateQueries({ queryKey: ["drivers"] });
       queryClient.invalidateQueries({ queryKey: ["commission"] });
@@ -57,11 +63,64 @@ export function useWaiveCommission() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ userId, amount, note }: { userId: string; amount?: number; note?: string }) =>
-      api.post<{ owed: number }>(`/admin/drivers/${userId}/commission/waive`, { amount, note }),
+    mutationFn: ({
+      userId,
+      amount,
+      note,
+    }: {
+      userId: string;
+      amount?: number;
+      note?: string;
+    }) =>
+      api.post<{ owed: number }>(`/admin/drivers/${userId}/commission/waive`, {
+        amount,
+        note,
+      }),
     onSuccess: (_data, { userId }) => {
       queryClient.invalidateQueries({ queryKey: ["commission"] });
       queryClient.invalidateQueries({ queryKey: ["users", "detail", userId] });
+    },
+  });
+}
+
+/** Approve or reject one driver document; approving every required one approves the driver. */
+export function useDecideDriverDocument() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      decision,
+      reason,
+    }: {
+      id: string;
+      decision: "approve" | "reject";
+      reason?: string;
+    }) =>
+      api.post(`/admin/driver-documents/${id}/decision`, { decision, reason }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users", "detail"] });
+      queryClient.invalidateQueries({ queryKey: ["drivers"] });
+    },
+  });
+}
+
+/** Clear a driver to go online, or reject them (with a reason). */
+export function useSetDriverApproval() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      userId,
+      decision,
+      reason,
+    }: {
+      userId: string;
+      decision: "approve" | "reject";
+      reason?: string;
+    }) => api.post(`/admin/drivers/${userId}/approval`, { decision, reason }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users", "detail"] });
+      queryClient.invalidateQueries({ queryKey: ["drivers"] });
+      queryClient.invalidateQueries({ queryKey: ["analytics"] });
     },
   });
 }

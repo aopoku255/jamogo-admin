@@ -5,12 +5,10 @@ import { Users } from "lucide-react";
 import { useUsers } from "@/hooks/useUsers";
 import { useServerPagination } from "@/hooks/useServerPagination";
 import { UsersTable } from "@/components/users/UsersTable";
-import { UserDetailDialog } from "@/components/users/UserDetailDialog";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Spinner } from "@/components/ui/Spinner";
 import { Pagination } from "@/components/ui/Pagination";
 import { RequirePermission } from "@/components/RequirePermission";
-import type { AdminUser } from "@/lib/types";
 
 export default function UsersPage() {
   return (
@@ -24,7 +22,6 @@ function UsersPageContent() {
   const [search, setSearch] = useState("");
   const pagination = useServerPagination(10);
   const { data, isLoading, isError } = useUsers(search, pagination);
-  const [selected, setSelected] = useState<AdminUser | null>(null);
   const users = data?.users ?? [];
   const total = data?.total ?? 0;
   const pageCount = Math.max(1, Math.ceil(total / pagination.pageSize));
@@ -60,7 +57,7 @@ function UsersPageContent() {
         />
       ) : (
         <>
-          <UsersTable users={users} onView={setSelected} />
+          <UsersTable users={users} />
           <Pagination
             page={pagination.page}
             pageCount={pageCount}
@@ -70,8 +67,6 @@ function UsersPageContent() {
           />
         </>
       )}
-
-      <UserDetailDialog userId={selected?.id ?? null} onClose={() => setSelected(null)} />
     </div>
   );
 }
