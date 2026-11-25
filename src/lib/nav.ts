@@ -13,6 +13,7 @@ import {
   UsersRound,
   BarChart3,
   ReceiptText,
+  Siren,
 } from "lucide-react";
 import type { Permission } from "@/lib/types";
 
@@ -23,6 +24,8 @@ export type NavLink = {
   description: string;
   icon: typeof LayoutDashboard;
   permission?: Permission;
+  /** Shows a live count next to the link (see NavLinks). */
+  badge?: "sos";
 };
 
 export type NavGroup = { heading?: string; links: NavLink[] };
@@ -43,6 +46,15 @@ export const NAV_GROUPS: NavGroup[] = [
     heading: "Operations",
     links: [
       {
+        href: "/sos",
+        label: "SOS alerts",
+        description:
+          "When a rider or driver presses SOS. Call them, mark that you're on it, then close it with a note.",
+        icon: Siren,
+        permission: "trips.view",
+        badge: "sos",
+      },
+      {
         href: "/trips",
         label: "Trips",
         description: "Every ride request, from search to drop-off.",
@@ -52,7 +64,8 @@ export const NAV_GROUPS: NavGroup[] = [
       {
         href: "/co-riders",
         label: "Co-rider search",
-        description: "How riders find each other to share a ride.",
+        description:
+          "How Find co-riders searches end. Use it to tune the search time and detour limit in Configurations.",
         icon: UsersRound,
         permission: "analytics.view",
       },

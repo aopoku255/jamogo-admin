@@ -86,3 +86,14 @@ export function rangeFromParams(params: URLSearchParams | null): DateRange {
     !!v && /^\d{4}-\d{2}-\d{2}$/.test(v);
   return ok(from) && ok(to) && from <= to ? { from, to } : presetRange("30d");
 }
+
+/** "just now", "4 min ago", "2 h ago", "3 days ago". */
+export function timeAgo(iso: string, now = Date.now()) {
+  const mins = Math.max(0, Math.round((now - new Date(iso).getTime()) / 60000));
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins} min ago`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `${hours} h ago`;
+  const days = Math.round(hours / 24);
+  return `${days} day${days === 1 ? "" : "s"} ago`;
+}

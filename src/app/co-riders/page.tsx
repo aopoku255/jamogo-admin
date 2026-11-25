@@ -38,14 +38,8 @@ function CoRiderSearchContent() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="font-heading text-xl font-bold text-jamogo-ink-900">Co-rider search</h1>
-          <p className="mt-1 max-w-2xl text-sm text-jamogo-gray-500">
-            How &ldquo;Find co-riders&rdquo; searches end. Use it to tune the search time and detour
-            limit on the Configurations page.
-          </p>
-        </div>
+      {/* The page title and description come from the shell's header. */}
+      <div className="flex flex-wrap items-center justify-end gap-4">
         <div className="flex rounded-xl border border-jamogo-gray-200 p-1" role="group" aria-label="Date range">
           {RANGES.map((r) => (
             <button

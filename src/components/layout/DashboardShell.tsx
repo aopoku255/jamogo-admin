@@ -6,6 +6,7 @@ import { Sidebar } from "./Sidebar";
 import { MobileNav } from "./MobileNav";
 import { Topbar } from "./Topbar";
 import { navLinkFor } from "@/lib/nav";
+import { SosAlarm, SosBanner } from "@/components/sos/SosWatcher";
 
 /**
  * Sidebar + top bar around every page, with the page's title and a line
@@ -18,11 +19,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen bg-jamogo-bg">
+      <SosAlarm />
       <Sidebar />
       <MobileNav open={mobileOpen} onClose={() => setMobileOpen(false)} />
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar onMenuClick={() => setMobileOpen(true)} />
         <main key={pathname} className="flex-1 animate-fade-in p-4 lg:p-6">
+          <SosBanner />
           {/* Detail pages (/trips/123…) draw their own header. */}
           {current && current.href === pathname && (
             <div className="mb-6">

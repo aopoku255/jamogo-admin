@@ -11,7 +11,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import { RequirePermission } from "@/components/RequirePermission";
 import type { TripStatus } from "@/lib/types";
 
-type Filter = "all" | TripStatus;
+type Filter = "all" | TripStatus | "sos";
 
 const FILTERS: { value: Filter; label: string }[] = [
   { value: "all", label: "All" },
@@ -20,6 +20,7 @@ const FILTERS: { value: Filter; label: string }[] = [
   { value: "ongoing", label: "Ongoing" },
   { value: "completed", label: "Completed" },
   { value: "cancelled", label: "Cancelled" },
+  { value: "sos", label: "Had an SOS" },
 ];
 
 export default function TripsPage() {

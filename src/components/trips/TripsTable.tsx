@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/Badge";
 import Link from "next/link";
+import { Siren } from "lucide-react";
 import type { Trip } from "@/lib/types";
 
 function formatDate(iso: string) {
@@ -61,7 +62,25 @@ export function TripsTable({ trips }: { trips: Trip[] }) {
                 GH₵{trip.yourOffer}
               </td>
               <td className="px-5 py-3">
-                <Badge tone={STATUS_TONE[trip.status]}>{trip.status}</Badge>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <Badge tone={STATUS_TONE[trip.status]}>{trip.status}</Badge>
+                  {trip.sos && (
+                    <span
+                      title={
+                        trip.sos.active
+                          ? `${trip.sos.active} SOS alert${trip.sos.active === 1 ? "" : "s"} still being handled`
+                          : `SOS pressed ${trip.sos.total === 1 ? "once" : `${trip.sos.total} times`}, handled`
+                      }
+                      className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-bold whitespace-nowrap ${
+                        trip.sos.active
+                          ? "bg-jamogo-danger text-white"
+                          : "bg-jamogo-danger/15 text-jamogo-danger"
+                      }`}
+                    >
+                      <Siren size={12} /> SOS
+                    </span>
+                  )}
+                </div>
               </td>
               <td className="px-5 py-3 text-right">
                 <Link

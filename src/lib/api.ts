@@ -1,6 +1,18 @@
 import { getAdminSession, clearAdminSession } from "./adminAuth";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
+/**
+ * The API's base, ending in /api (every backend route lives under it). A
+ * base set without it ("https://jamogo-api.example.com") gets it added, and
+ * a trailing slash is dropped — so a slightly-off hosting setting can't send
+ * every request to a path that doesn't exist.
+ */
+export function apiBase(raw = process.env.NEXT_PUBLIC_API_BASE_URL ?? "") {
+  const base = raw.trim().replace(/\/+$/, "");
+  if (!base) return "";
+  return /\/api(\/v\d+)?$/.test(base) ? base.replace(/\/v\d+$/, "") : `${base}/api`;
+}
+
+const API_BASE_URL = apiBase();
 
 export class ApiError extends Error {
   status: number;

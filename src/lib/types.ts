@@ -206,6 +206,8 @@ export type Trip = {
   acceptedOffer?: DriverOffer | null;
   offers?: DriverOffer[];
   coRiders?: CoRider[];
+  /** SOS alerts on this trip (list endpoint only): all, and those not yet resolved. */
+  sos?: { total: number; active: number } | null;
 };
 
 /** One row of the commission ledger (replaces the wallet). */
@@ -392,7 +394,11 @@ export type TripDetail = {
     createdAt: string;
     lat: string | null;
     lng: string | null;
+    status: SosStatus;
+    resolutionNote: string | null;
     user?: AdminUserSummary;
+    acknowledgedBy?: { id: string; name: string } | null;
+    resolvedBy?: { id: string; name: string } | null;
   }[];
   messageCount: number;
 };
@@ -601,4 +607,61 @@ export type Settlements = {
     settled: number;
   };
   drivers: SettlementRow[];
+};
+
+export type SosStatus = "open" | "acknowledged" | "resolved";
+export type SosFilter = "active" | SosStatus | "all";
+
+type SosPerson = {
+  id: string;
+  name: string;
+  phone: string | null;
+  role?: "rider" | "driver";
+  avatarUrl?: string | null;
+};
+
+/** One SOS alert as GET /admin/sos returns it. */
+export type SosAlert = {
+  id: string;
+  userId: string;
+  tripId: string | null;
+  lat: number | null;
+  lng: number | null;
+  mapUrl: string | null;
+  status: SosStatus;
+  createdAt: string;
+  acknowledgedAt: string | null;
+  resolvedAt: string | null;
+  resolutionNote: string | null;
+  /** How the person who pressed SOS was on the trip. */
+  raisedAs: "rider" | "driver" | "co-rider";
+  user: SosPerson | null;
+  acknowledgedBy: { id: string; name: string; username: string } | null;
+  resolvedBy: { id: string; name: string; username: string } | null;
+  trip: {
+    id: string;
+    status: TripStatus;
+    mode: "solo" | "share";
+    pickupLabel: string;
+    destinationLabel: string | null;
+    yourOffer: number;
+    createdAt: string;
+  } | null;
+  /** Everyone else on the trip, to call. */
+  others: {
+    id: string;
+    name: string;
+    phone: string | null;
+    role: "rider" | "driver" | "co-rider";
+    car?: string;
+    plate?: string;
+  }[];
+  /** The trusted contacts who were texted. */
+  notifiedContacts: { id: string; name: string; phone: string | null; relationship: string | null }[];
+};
+
+export type SosCounts = { open: number; acknowledged: number };
+
+export type SosSummary = SosCounts & {
+  latest: { id: string; createdAt: string; name: string | null } | null;
 };

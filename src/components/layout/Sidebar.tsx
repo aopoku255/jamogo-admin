@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { ChevronsLeft, ChevronsRight } from "lucide-react";
 import { useCurrentAdmin } from "@/hooks/useAdminAuth";
 import { NAV_GROUPS, type NavGroup } from "@/lib/nav";
+import { useSosSummary } from "@/hooks/useSos";
 
 const COLLAPSED_STORAGE_KEY = "jamogo-sidebar-collapsed";
 
@@ -29,6 +30,8 @@ export function NavLinks({
 }) {
   const pathname = usePathname();
   const groups = useVisibleNav();
+  const { data: sos } = useSosSummary();
+  const badges = { sos: sos?.open ?? 0 };
 
   return (
     <nav className="scrollbar-thin flex-1 space-y-4 overflow-y-auto px-2.5 py-4">
@@ -70,6 +73,16 @@ export function NavLinks({
                   className={`shrink-0 ${active ? "text-jamogo-green-500" : ""}`}
                 />
                 {!collapsed && <span className="truncate">{link.label}</span>}
+                {link.badge && badges[link.badge] > 0 && (
+                  <span
+                    aria-label={`${badges[link.badge]} open`}
+                    className={`flex min-w-5 animate-pulse items-center justify-center rounded-full bg-jamogo-danger px-1.5 text-[11px] leading-5 font-bold text-white ${
+                      collapsed ? "absolute top-1 right-1 h-4 min-w-4 px-1 text-[10px] leading-4" : "ml-auto h-5"
+                    }`}
+                  >
+                    {badges[link.badge]}
+                  </span>
+                )}
               </Link>
             );
           })}

@@ -425,15 +425,52 @@ function TripBody({ data }: { data: TripDetail }) {
                 </p>
               ) : (
                 data.sosAlerts.map((a) => (
-                  <p
+                  <div
                     key={a.id}
-                    className="flex items-start gap-2 rounded-lg bg-jamogo-danger/10 px-3 py-2 text-jamogo-danger"
+                    className={`rounded-lg px-3 py-2 ${
+                      a.status === "resolved"
+                        ? "bg-jamogo-gray-50 text-jamogo-ink-900"
+                        : "bg-jamogo-danger/10 text-jamogo-danger"
+                    }`}
                   >
-                    <ShieldAlert size={16} className="mt-0.5 shrink-0" />
-                    SOS from {a.user?.name ?? "someone"} at{" "}
-                    {formatDate(a.createdAt, true)}
-                  </p>
+                    <p className="flex items-start gap-2">
+                      <ShieldAlert size={16} className="mt-0.5 shrink-0 text-jamogo-danger" />
+                      <span className="min-w-0 flex-1">
+                        SOS from {a.user?.name ?? "someone"} at{" "}
+                        {formatDate(a.createdAt, true)}
+                      </span>
+                      <Badge
+                        tone={
+                          a.status === "resolved"
+                            ? "success"
+                            : a.status === "acknowledged"
+                              ? "warning"
+                              : "danger"
+                        }
+                      >
+                        {a.status === "resolved"
+                          ? "Resolved"
+                          : a.status === "acknowledged"
+                            ? "Being handled"
+                            : "Open"}
+                      </Badge>
+                    </p>
+                    {a.resolutionNote && (
+                      <p className="mt-1 pl-6 text-xs whitespace-pre-line text-jamogo-gray-700">
+                        {a.resolvedBy?.name ? `${a.resolvedBy.name}: ` : ""}
+                        {a.resolutionNote}
+                      </p>
+                    )}
+                  </div>
                 ))
+              )}
+              {data.sosAlerts.some((a) => a.status !== "resolved") && (
+                <Link
+                  href="/sos"
+                  className="inline-flex items-center gap-1 text-sm font-semibold text-jamogo-danger hover:underline"
+                >
+                  Handle it on the SOS page
+                </Link>
               )}
               <p className="flex items-center gap-2 text-jamogo-gray-500">
                 <MessageSquare size={16} /> {data.messageCount} chat message
